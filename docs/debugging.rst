@@ -85,3 +85,38 @@ work with the following caveats. If the built-in debugger is not
 disabled, it will catch unhandled exceptions before the external
 debugger can. If the reloader is not disabled, it could cause an
 unexpected reload if code changes during debugging.
+
+With Flask's debugger disabled, Werkzeug's built-in exception handler
+will catch any exceptions that your application does not. These will
+NOT be propagated to your debugger, even if the ``PROPAGATE_EXCEPTIONS``
+option is enabled.
+
+If this becomes an obstacle, Werkzeug can be instructed to instead
+propagate these exceptions by calling :meth:`Flask.run` with
+``passthrough_errors=True``. Note: this will result in the development
+server crashing as soon as your debugger allows execution to finish; for
+this reason, it is recommended to set breakpoints over setting this option.
+
+An example of setting this for `Debugpy <https://github.com/microsoft/debugpy>`__
+running under `Vimspector <https://puremourning.github.io/vimspector/>`__:
+
+.. code-block:: json
+
+    {
+        "flask": {
+            "adapter": "debugpy",
+            "default": true,
+            "configuration": {
+                "name": "Python Flask",
+                "type": "python",
+                "request": "launch",
+                "python": "${workspaceRoot}/.venv/bin/python",
+                "cwd": "${workspaceRoot}/",
+                "code": "from my_app import app; app.run(passthrough_errors=True, debug=True, use_debugger=False, use_reloader=False, host='localhost', port=5000)",
+                "env": {
+                    "FLASK_ENV": "development"
+                },
+                "justMyCode": false
+            }
+        }
+    }
